@@ -9,13 +9,13 @@ interface BookCardProps {
 export const BookCard = ({ book, onClick, className = '' }: BookCardProps) => {
   return (
     <div 
-      className={`book-card bg-card rounded-lg overflow-hidden min-w-[160px] md:min-w-[200px] ${className}`}
+      className={`book-card bg-card rounded-lg overflow-hidden cursor-pointer transition-all duration-300 hover:scale-105 hover:z-10 flex-shrink-0 ${className}`}
       onClick={onClick}
     >
       <img 
         src={book.cover} 
         alt={`Capa do livro ${book.title}`}
-        className="w-full h-full object-cover aspect-[2/3]"
+        className="w-full h-full object-cover rounded-lg"
         loading="lazy"
         onError={(e) => {
           const target = e.target as HTMLImageElement;

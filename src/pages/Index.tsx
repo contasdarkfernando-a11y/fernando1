@@ -45,6 +45,18 @@ const Index = () => {
           </div>
         );
       
+      case 'education':
+        const educationSection = library.sections.find(s => s.id === 'education');
+        return educationSection ? (
+          <div className="py-8 md:py-12">
+            <BookCarousel
+              title={educationSection.title}
+              books={educationSection.books}
+              onBookClick={handleBookClick}
+            />
+          </div>
+        ) : null;
+      
       case 'most-read':
         const mostReadSection = library.sections.find(s => s.id === 'most-read');
         return mostReadSection ? (
