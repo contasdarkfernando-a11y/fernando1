@@ -1,5 +1,10 @@
 import { Book, Library } from '@/types/book';
 import heroImage from '@/assets/hero-lotr-banner.jpg';
+import quintoEvangelhoImg from '@/assets/quinto-evangelho.jpg';
+import loucosPorJesusImg from '@/assets/loucos-por-jesus.jpg';
+import concursoMathiasImg from '@/assets/concurso-mathias.jpg';
+import filosofiaImg from '@/assets/filosofia.jpg';
+import telecursoImg from '@/assets/telecurso.jpg';
 
 const generateBookId = (title: string, author: string): string => {
   return `${title.toLowerCase().replace(/\s+/g, '-')}-${author.toLowerCase().replace(/\s+/g, '-')}`;
@@ -22,7 +27,7 @@ const educationBooks: Book[] = [
     title: 'O Quinto Evangelho',
     author: 'Autor',
     summary: 'Uma obra que explora os aspectos espirituais e filosóficos do cristianismo de uma perspectiva única e transformadora.',
-    cover: 'https://placehold.co/400x600/2c3e50/ecf0f1?text=O+Quinto+Evangelho',
+    cover: quintoEvangelhoImg,
     driveLink: 'https://drive.google.com/file/d/1_-Ssdouj3NJO9bx3428foQBe_XMe8kDg/view?usp=drive_link'
   },
   {
@@ -30,7 +35,7 @@ const educationBooks: Book[] = [
     title: 'Loucos Por Jesus',
     author: 'Autor',
     summary: 'Um livro sobre fé radical e compromisso total com os ensinamentos cristãos, explorando o que significa viver uma vida dedicada.',
-    cover: 'https://placehold.co/400x600/8e44ad/ecf0f1?text=Loucos+Por+Jesus',
+    cover: loucosPorJesusImg,
     driveLink: 'https://drive.google.com/file/d/1HlyCaiuk3YGFYkAuObLKcDnulg-aT-6-/view?usp=drive_link'
   },
   {
@@ -38,7 +43,7 @@ const educationBooks: Book[] = [
     title: 'Filosofia',
     author: 'Vários Autores',
     summary: 'Uma coleção abrangente de textos filosóficos que exploram as grandes questões da existência humana.',
-    cover: 'https://placehold.co/400x600/34495e/ecf0f1?text=Filosofia',
+    cover: filosofiaImg,
     driveLink: 'https://drive.google.com/file/d/1dPoW7I2cTmkbGpm7OZZ8h7tQ8P6NbLbY/view?usp=drive_link'
   },
   {
@@ -46,7 +51,7 @@ const educationBooks: Book[] = [
     title: 'Como ser aprovado em qualquer concurso',
     author: 'Mathias Gonzales',
     summary: 'Um guia completo com estratégias e técnicas para conquistar a aprovação em concursos públicos.',
-    cover: 'https://placehold.co/400x600/27ae60/ecf0f1?text=Como+ser+aprovado',
+    cover: concursoMathiasImg,
     driveLink: 'https://drive.google.com/file/d/1lGBEYWfSPdZ_KzUJvgDrqSSIF9CuwQpU/view?usp=drive_link'
   },
   {
@@ -54,7 +59,7 @@ const educationBooks: Book[] = [
     title: 'Telecurso 2000',
     author: 'Fundação Roberto Marinho',
     summary: 'Material educativo completo que aborda diversas disciplinas do ensino fundamental e médio.',
-    cover: 'https://placehold.co/400x600/e74c3c/ecf0f1?text=Telecurso+2000',
+    cover: telecursoImg,
     driveLink: 'https://drive.google.com/drive/folders/1b62ggGezMideBBSRNOny3EwzjjPXHclI?usp=drive_link'
   }
 ];
