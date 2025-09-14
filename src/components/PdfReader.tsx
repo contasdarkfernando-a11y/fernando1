@@ -6,9 +6,9 @@ import { toast } from '@/hooks/use-toast';
 import 'react-pdf/dist/Page/AnnotationLayer.css';
 import 'react-pdf/dist/Page/TextLayer.css';
 // Configurar worker do PDF.js (usar worker local para evitar CORS)
-import pdfjsWorker from 'pdfjs-dist/build/pdf.worker.min.mjs?worker';
+import pdfjsWorkerUrl from 'pdfjs-dist/build/pdf.worker.min.mjs?url';
 
-pdfjs.GlobalWorkerOptions.workerPort = new pdfjsWorker();
+pdfjs.GlobalWorkerOptions.workerSrc = pdfjsWorkerUrl;
 
 const READING_STATE_KEY = 'pdf-reading-state';
 
