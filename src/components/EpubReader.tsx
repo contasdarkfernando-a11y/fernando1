@@ -177,26 +177,26 @@ export const EpubReader = ({ file, onClose }: EpubReaderProps) => {
       </div>
 
       {/* Área de leitura */}
-      <div className="flex-1 relative bg-background">
+      <div className="flex-1 relative bg-white">
         {isLoading && (
           <div className="absolute inset-0 flex items-center justify-center">
             <div className="text-center">
-              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto mb-4"></div>
-              <p>Carregando livro...</p>
+              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-600 mx-auto mb-4"></div>
+              <p className="text-gray-800">Carregando livro...</p>
             </div>
           </div>
         )}
         
         {error && (
           <div className="absolute inset-0 flex items-center justify-center">
-            <div className="text-center max-w-md p-6">
+            <div className="text-center max-w-md p-6 bg-white rounded-lg shadow-lg">
               <div className="text-red-500 mb-4">
                 <svg className="w-16 h-16 mx-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.732-.833-2.5 0L4.268 18.5c-.77.833.192 2.5 1.732 2.5z" />
                 </svg>
               </div>
               <h3 className="text-lg font-semibold mb-2">Erro ao carregar EPUB</h3>
-              <p className="text-muted-foreground mb-4">{error}</p>
+              <p className="text-gray-600 mb-4">{error}</p>
               <Button onClick={onClose}>Voltar</Button>
             </div>
           </div>
@@ -204,8 +204,16 @@ export const EpubReader = ({ file, onClose }: EpubReaderProps) => {
         
         <div 
           ref={viewerRef} 
-          className={`w-full h-full ${isLoading || error ? 'invisible' : 'visible'}`}
-          style={{ minHeight: '100%' }}
+          className={`w-full h-full bg-white ${isLoading || error ? 'invisible' : 'visible'}`}
+          style={{ 
+            minHeight: '100%',
+            color: '#000000',
+            fontSize: '16px',
+            lineHeight: '1.6',
+            padding: '20px',
+            maxWidth: '800px',
+            margin: '0 auto'
+          }}
         />
 
         {/* Controles de navegação */}
@@ -214,7 +222,7 @@ export const EpubReader = ({ file, onClose }: EpubReaderProps) => {
             <Button
               variant="outline"
               size="sm"
-              className="absolute left-4 top-1/2 transform -translate-y-1/2"
+              className="absolute left-4 top-1/2 transform -translate-y-1/2 bg-white/90 hover:bg-white shadow-lg"
               onClick={goToPrevPage}
             >
               <ChevronLeft className="w-4 h-4" />
@@ -222,7 +230,7 @@ export const EpubReader = ({ file, onClose }: EpubReaderProps) => {
             <Button
               variant="outline"
               size="sm"
-              className="absolute right-4 top-1/2 transform -translate-y-1/2"
+              className="absolute right-4 top-1/2 transform -translate-y-1/2 bg-white/90 hover:bg-white shadow-lg"
               onClick={goToNextPage}
             >
               <ChevronRight className="w-4 h-4" />
@@ -230,6 +238,13 @@ export const EpubReader = ({ file, onClose }: EpubReaderProps) => {
           </>
         )}
       </div>
+      
+      {/* Barra inferior com informações */}
+      {!isLoading && !error && (
+        <div className="flex items-center justify-center p-2 border-t bg-card text-sm text-muted-foreground">
+          Use as setas do teclado ou os botões laterais para navegar
+        </div>
+      )}
     </div>
   );
 };
