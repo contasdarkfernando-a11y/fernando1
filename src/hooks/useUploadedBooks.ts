@@ -26,9 +26,15 @@ export const useUploadedBooks = () => {
     if (stored) {
       try {
         const parsedBooks = JSON.parse(stored);
-        // Como File não é serializável, precisamos recriar apenas a metadata
-        // Os arquivos serão perdidos ao recarregar a página (limitação do navegador)
-        setUploadedBooks([]);
+        // Manter apenas a metadata dos livros (arquivos são perdidos no refresh)
+        const booksMetadata = parsedBooks.map((book: any) => ({
+          ...book,
+          uploadDate: new Date(book.uploadDate),
+          lastRead: book.lastRead ? new Date(book.lastRead) : undefined,
+          file: null // Arquivo será perdido, mas mantemos a metadata
+        }));
+        // Não definir os livros pois os arquivos File são perdidos no refresh
+        // setUploadedBooks(booksMetadata);
       } catch (error) {
         console.error('Erro ao carregar livros:', error);
       }

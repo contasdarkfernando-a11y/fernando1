@@ -9,6 +9,7 @@ interface MobiReaderProps {
 }
 
 const READING_STATE_KEY = 'mobi-reading-state';
+const MOBI_CONTENT_KEY = 'mobi-content-cache';
 
 export const MobiReader: React.FC<MobiReaderProps> = ({ file, onClose }) => {
   const [content, setContent] = useState<string>('');
@@ -19,6 +20,96 @@ export const MobiReader: React.FC<MobiReaderProps> = ({ file, onClose }) => {
   const [fontSize, setFontSize] = useState(16);
   const [pages, setPages] = useState<string[]>([]);
   const contentRef = useRef<HTMLDivElement>(null);
+
+  // Função para detectar e converter codificação
+  const detectAndDecodeText = (uint8Array: Uint8Array): string => {
+    let text = '';
+    
+    // Tentar UTF-8 primeiro
+    try {
+      const decoder = new TextDecoder('utf-8', { fatal: true });
+      text = decoder.decode(uint8Array);
+      if (text && text.length > 100) {
+        return text;
+      }
+    } catch (e) {
+      // UTF-8 falhou, continuar com outras codificações
+    }
+    
+    // Tentar Latin-1 (ISO-8859-1)
+    try {
+      const decoder = new TextDecoder('latin1');
+      text = decoder.decode(uint8Array);
+      if (text && text.length > 100) {
+        return text;
+      }
+    } catch (e) {
+      // Latin-1 falhou
+    }
+    
+    // Tentar Windows-1252
+    try {
+      const decoder = new TextDecoder('windows-1252');
+      text = decoder.decode(uint8Array);
+      if (text && text.length > 100) {
+        return text;
+      }
+    } catch (e) {
+      // Windows-1252 falhou
+    }
+    
+    // Fallback: conversão manual byte a byte
+    for (let i = 0; i < uint8Array.length; i++) {
+      const byte = uint8Array[i];
+      
+      // Caracteres ASCII básicos
+      if (byte >= 32 && byte <= 126) {
+        text += String.fromCharCode(byte);
+      }
+      // Caracteres acentuados comuns (Latin-1)
+      else if (byte >= 160 && byte <= 255) {
+        text += String.fromCharCode(byte);
+      }
+      // Espaço para outros caracteres
+      else if (byte === 10 || byte === 13) {
+        text += ' ';
+      }
+    }
+    
+    return text;
+  };
+
+  // Salvar conteúdo processado no cache
+  const saveMobiContent = (fileName: string, processedPages: string[]) => {
+    try {
+      const cacheData = {
+        fileName,
+        pages: processedPages,
+        timestamp: Date.now(),
+        fileSize: file.size
+      };
+      localStorage.setItem(`${MOBI_CONTENT_KEY}-${fileName}`, JSON.stringify(cacheData));
+    } catch (error) {
+      console.warn('Não foi possível salvar o conteúdo no cache:', error);
+    }
+  };
+
+  // Carregar conteúdo do cache
+  const loadMobiContent = (fileName: string, fileSize: number): string[] | null => {
+    try {
+      const cached = localStorage.getItem(`${MOBI_CONTENT_KEY}-${fileName}`);
+      if (cached) {
+        const cacheData = JSON.parse(cached);
+        // Verificar se é o mesmo arquivo (nome e tamanho)
+        if (cacheData.fileName === fileName && cacheData.fileSize === fileSize) {
+          return cacheData.pages || null;
+        }
+      }
+    } catch (error) {
+      console.warn('Erro ao carregar conteúdo do cache:', error);
+    }
+    return null;
+  };
 
   // Salvar estado de leitura
   const saveReadingState = (page: number, size: number) => {
@@ -56,42 +147,38 @@ export const MobiReader: React.FC<MobiReaderProps> = ({ file, onClose }) => {
         setCurrentPage(savedState.page);
         setFontSize(savedState.fontSize);
 
+        // Tentar carregar do cache primeiro
+        const cachedContent = loadMobiContent(file.name, file.size);
+        if (cachedContent && cachedContent.length > 0) {
+          setPages(cachedContent);
+          setTotalPages(cachedContent.length);
+          setContent(cachedContent[Math.min(savedState.page - 1, cachedContent.length - 1)]);
+          setIsLoading(false);
+          
+          toast({
+            title: "Conteúdo carregado do cache",
+            description: "Livro carregado rapidamente do cache local",
+          });
+          
+          if (savedState.page > 1) {
+            toast({
+              title: "Posição restaurada",
+              description: `Continuando da página ${savedState.page}`,
+            });
+          }
+          return;
+        }
+
         // Ler o arquivo como ArrayBuffer
         const arrayBuffer = await file.arrayBuffer();
         const uint8Array = new Uint8Array(arrayBuffer);
         
-        // Procurar por texto legível no arquivo MOBI
-        let extractedText = '';
-        let textFound = false;
+        // Detectar e decodificar o texto
+        const rawText = detectAndDecodeText(uint8Array);
         
-        // Procurar por padrões de texto HTML/XML no arquivo MOBI
-        for (let i = 0; i < uint8Array.length - 4; i++) {
-          const byte = uint8Array[i];
-          
-          // Verificar se é um caractere ASCII imprimível
-          if (byte >= 32 && byte <= 126) {
-            const char = String.fromCharCode(byte);
-            extractedText += char;
-            
-            // Se encontrou uma tag HTML, provavelmente é conteúdo de texto
-            if (extractedText.includes('<html') || extractedText.includes('<body') || extractedText.includes('<p>')) {
-              textFound = true;
-            }
-          } else if (textFound && extractedText.length > 0) {
-            // Se estava coletando texto e encontrou um byte não-ASCII, adiciona espaço
-            if (extractedText[extractedText.length - 1] !== ' ') {
-              extractedText += ' ';
-            }
-          }
-          
-          // Limitar o tamanho para evitar arquivos muito grandes
-          if (extractedText.length > 100000) break;
-        }
-
-        // Limpar e processar o texto extraído
-        if (extractedText.length > 100 && textFound) {
+        if (rawText && rawText.length > 100) {
           // Remover tags HTML e limpar o texto
-          let cleanText = extractedText
+          let cleanText = rawText
             .replace(/<script[^>]*>[\s\S]*?<\/script>/gi, '') // Remover scripts
             .replace(/<style[^>]*>[\s\S]*?<\/style>/gi, '') // Remover estilos
             .replace(/<[^>]*>/g, ' ') // Remover todas as tags HTML
@@ -100,28 +187,30 @@ export const MobiReader: React.FC<MobiReaderProps> = ({ file, onClose }) => {
             .replace(/&lt;/g, '<') // Substituir &lt;
             .replace(/&gt;/g, '>') // Substituir &gt;
             .replace(/&quot;/g, '"') // Substituir &quot;
+            .replace(/&apos;/g, "'") // Substituir &apos;
             .replace(/&#\d+;/g, ' ') // Remover entidades numéricas
+            .replace(/&[a-zA-Z]+;/g, ' ') // Remover outras entidades HTML
             .replace(/\s+/g, ' ') // Normalizar espaços
-            .replace(/[^\x20-\x7E\u00C0-\u017F\u0100-\u024F]/g, ' ') // Manter apenas caracteres legíveis
+            .replace(/[^\x20-\x7E\u00A0-\u00FF\u0100-\u017F\u0180-\u024F]/g, ' ') // Manter caracteres legíveis incluindo acentos
             .trim();
 
           // Dividir em parágrafos e depois em páginas
-          const paragraphs = cleanText.split(/\.\s+/).filter(p => p.length > 20);
+          const sentences = cleanText.split(/[.!?]+\s+/).filter(s => s.length > 10);
           const wordsPerPage = 400;
           const pageArray: string[] = [];
           
           let currentPageText = '';
           let wordCount = 0;
           
-          for (const paragraph of paragraphs) {
-            const words = paragraph.split(' ');
+          for (const sentence of sentences) {
+            const words = sentence.trim().split(/\s+/);
             
             if (wordCount + words.length > wordsPerPage && currentPageText.length > 0) {
-              pageArray.push(currentPageText.trim() + '.');
-              currentPageText = paragraph + '. ';
+              pageArray.push(currentPageText.trim());
+              currentPageText = sentence + '. ';
               wordCount = words.length;
             } else {
-              currentPageText += paragraph + '. ';
+              currentPageText += sentence + '. ';
               wordCount += words.length;
             }
           }
@@ -135,6 +224,10 @@ export const MobiReader: React.FC<MobiReaderProps> = ({ file, onClose }) => {
             setPages(pageArray);
             setTotalPages(pageArray.length);
             setContent(pageArray[Math.min(savedState.page - 1, pageArray.length - 1)]);
+            
+            // Salvar no cache para próximas vezes
+            saveMobiContent(file.name, pageArray);
+            
             setIsLoading(false);
             
             if (savedState.page > 1) {
