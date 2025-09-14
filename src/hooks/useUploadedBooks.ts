@@ -138,7 +138,7 @@ export const useUploadedBooks = () => {
     lastReadBook,
     addBook,
     removeBook,
-    clearAllBooks
+    clearAllBooks,
     markAsRead
   };
 };
