@@ -4,9 +4,10 @@ import { Button } from '@/components/ui/button';
 import { ChevronLeft, ChevronRight, ArrowLeft, ZoomIn, ZoomOut } from 'lucide-react';
 import 'react-pdf/dist/Page/AnnotationLayer.css';
 import 'react-pdf/dist/Page/TextLayer.css';
+// Configurar worker do PDF.js (usar worker local para evitar CORS)
+import pdfjsWorker from 'pdfjs-dist/build/pdf.worker.min.mjs?worker';
 
-// Configurar worker do PDF.js
-pdfjs.GlobalWorkerOptions.workerSrc = `//unpkg.com/pdfjs-dist@${pdfjs.version}/build/pdf.worker.min.js`;
+pdfjs.GlobalWorkerOptions.workerPort = new pdfjsWorker();
 
 interface PdfReaderProps {
   file: File;

@@ -7,6 +7,7 @@ import { HeroSection } from '@/components/HeroSection';
 import { BookCarousel } from '@/components/BookCarousel';
 import { BookModal } from '@/components/BookModal';
 import { ReaderSection } from '@/components/ReaderSection';
+import { AZCatalog } from '@/components/AZCatalog';
 import { Footer } from '@/components/Footer';
 
 const Index = () => {
@@ -86,17 +87,11 @@ const Index = () => {
         ) : null;
       
       case 'az':
-        const azSection = library.sections.find(s => s.id === 'az');
-        return azSection ? (
+        return (
           <div className="py-8 md:py-12">
-            <BookCarousel
-              title={azSection.title}
-              books={[]}
-              onBookClick={handleBookClick}
-              isAZ={true}
-            />
+            <AZCatalog />
           </div>
-        ) : null;
+        );
       
       default: // home
         return (
@@ -118,12 +113,7 @@ const Index = () => {
               
               {/* A-Z Section */}
               {library.sections.find(s => s.isAZ) && (
-                <BookCarousel
-                  title="Explore de A a Z"
-                  books={[]}
-                  onBookClick={handleBookClick}
-                  isAZ={true}
-                />
+                <AZCatalog />
               )}
             </main>
           </>
