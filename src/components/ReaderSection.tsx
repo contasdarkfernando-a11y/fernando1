@@ -6,11 +6,11 @@ import { MobiReader } from './MobiReader';
 import { useUploadedBooks, UploadedBook } from '@/hooks/useUploadedBooks';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
-import { FileText, BookOpen, Trash2 } from 'lucide-react';
+import { FileText, BookOpen, Trash2, Clock, Star } from 'lucide-react';
 import { toast } from '@/hooks/use-toast';
 
 export const ReaderSection = () => {
-  const { uploadedBooks, addBook, removeBook, clearAllBooks } = useUploadedBooks();
+  const { uploadedBooks, lastReadBook, addBook, removeBook, clearAllBooks, markAsRead } = useUploadedBooks();
   const [currentBook, setCurrentBook] = useState<UploadedBook | null>(null);
 
   const handleFileUpload = (file: File) => {
@@ -18,6 +18,7 @@ export const ReaderSection = () => {
   };
 
   const handleOpenBook = (book: UploadedBook) => {
+    markAsRead(book.id);
     setCurrentBook(book);
   };
 
@@ -42,6 +43,9 @@ export const ReaderSection = () => {
     return <BookOpen className="w-8 h-8" />;
   };
 
+  // Separar último livro lido dos outros
+  const lastReadBookData = uploadedBooks.find(book => book.id === lastReadBook);
+  const otherBooks = uploadedBooks.filter(book => book.id !== lastReadBook);
   // Renderizar o leitor se um livro estiver selecionado
   if (currentBook) {
     const fileExtension = currentBook.name.split('.').pop()?.toLowerCase();
@@ -91,8 +95,59 @@ export const ReaderSection = () => {
               </Button>
             </div>
             
+            {/* Último livro lido */}
+            {lastReadBookData && (
+              <div className="mb-8">
+                <h3 className="text-lg font-medium mb-4 flex items-center gap-2">
+                  <Clock className="w-5 h-5 text-primary" />
+                  Continue Lendo
+                </h3>
+                <Card className="p-4 border-primary/20 bg-primary/5">
+                  <div className="flex items-start gap-3">
+                    <div className="text-primary flex-shrink-0">
+                      {getFileIcon(lastReadBookData.type)}
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center gap-2 mb-1">
+                        <h3 className="font-medium truncate">{lastReadBookData.name}</h3>
+                        <Star className="w-4 h-4 text-primary" />
+                      </div>
+                      <p className="text-sm text-muted-foreground">
+                        {formatFileSize(lastReadBookData.size)}
+                      </p>
+                      {lastReadBookData.lastRead && (
+                        <p className="text-xs text-muted-foreground">
+                          Última leitura: {new Date(lastReadBookData.lastRead).toLocaleDateString('pt-BR')}
+                        </p>
+                      )}
+                      <div className="flex gap-2 mt-3">
+                        <Button 
+                          size="sm" 
+                          onClick={() => handleOpenBook(lastReadBookData)}
+                          className="bg-primary hover:bg-primary/90"
+                        >
+                          Continuar Lendo
+                        </Button>
+                        <Button 
+                          size="sm" 
+                          variant="outline"
+                          onClick={() => handleRemoveBook(lastReadBookData.id)}
+                        >
+                          <Trash2 className="w-4 h-4" />
+                        </Button>
+                      </div>
+                    </div>
+                  </div>
+                </Card>
+              </div>
+            )}
+            
+            {/* Outros livros */}
+            {otherBooks.length > 0 && (
+              <div>
+                <h3 className="text-lg font-medium mb-4">Todos os Livros</h3>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-              {uploadedBooks.map((book) => (
+                {otherBooks.map((book) => (
                 <Card key={book.id} className="p-4 hover:shadow-md transition-shadow">
                   <div className="flex items-start gap-3">
                     <div className="text-primary flex-shrink-0">
@@ -106,6 +161,11 @@ export const ReaderSection = () => {
                       <p className="text-xs text-muted-foreground">
                         {new Date(book.uploadDate).toLocaleDateString('pt-BR')}
                       </p>
+                      {book.lastRead && (
+                        <p className="text-xs text-muted-foreground">
+                          Última leitura: {new Date(book.lastRead).toLocaleDateString('pt-BR')}
+                        </p>
+                      )}
                       <div className="flex gap-2 mt-3">
                         <Button 
                           size="sm" 
@@ -126,6 +186,8 @@ export const ReaderSection = () => {
                 </Card>
               ))}
             </div>
+              </div>
+            )}
           </div>
         )}
         

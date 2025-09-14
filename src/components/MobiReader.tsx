@@ -1,6 +1,6 @@
 import React from 'react';
 import { Button } from '@/components/ui/button';
-import { ArrowLeft, Download } from 'lucide-react';
+import { ArrowLeft, Download, AlertCircle } from 'lucide-react';
 import { toast } from '@/hooks/use-toast';
 
 interface MobiReaderProps {
@@ -21,7 +21,7 @@ export const MobiReader = ({ file, onClose }: MobiReaderProps) => {
     
     toast({
       title: "Download iniciado",
-      description: "Use um aplicativo de leitura de ebooks para abrir o arquivo MOBI.",
+      description: "O arquivo foi baixado. Use um aplicativo compatível para lê-lo.",
     });
   };
 
@@ -44,29 +44,52 @@ export const MobiReader = ({ file, onClose }: MobiReaderProps) => {
       <div className="flex-1 flex items-center justify-center p-8">
         <div className="text-center max-w-md">
           <div className="mb-6">
-            <div className="w-16 h-16 mx-auto mb-4 bg-primary/10 rounded-full flex items-center justify-center">
-              <Download className="w-8 h-8 text-primary" />
+            <div className="w-16 h-16 mx-auto mb-4 bg-orange-500/10 rounded-full flex items-center justify-center">
+              <AlertCircle className="w-8 h-8 text-orange-500" />
             </div>
-            <h2 className="text-2xl font-bold mb-2">Arquivo MOBI Detectado</h2>
+            <h2 className="text-2xl font-bold mb-2">Formato MOBI</h2>
             <p className="text-muted-foreground mb-6">
-              Os arquivos MOBI não podem ser lidos diretamente no navegador. 
-              Faça o download para abrir em um aplicativo de leitura compatível.
+              Arquivos MOBI precisam ser abertos em aplicativos específicos. 
+              Baixe o arquivo para ler em seu dispositivo.
             </p>
           </div>
           
           <div className="space-y-4">
-            <Button onClick={handleDownload} className="w-full">
+            <Button onClick={handleDownload} className="w-full" size="lg">
               <Download className="w-4 h-4 mr-2" />
               Baixar Arquivo MOBI
             </Button>
             
-            <div className="text-sm text-muted-foreground">
-              <p className="font-medium mb-2">Aplicativos recomendados:</p>
-              <ul className="space-y-1">
-                <li>• Kindle (Amazon)</li>
-                <li>• Calibre</li>
-                <li>• FBReader</li>
-                <li>• Moon+ Reader</li>
+            <div className="text-sm text-muted-foreground bg-muted/20 p-4 rounded-lg">
+              <p className="font-medium mb-3">📱 Aplicativos recomendados:</p>
+              <div className="grid grid-cols-2 gap-2 text-left">
+                <div>
+                  <p className="font-medium">Desktop:</p>
+                  <ul className="space-y-1 text-xs">
+                    <li>• Calibre</li>
+                    <li>• Kindle para PC</li>
+                  </ul>
+                </div>
+                <div>
+                  <p className="font-medium">Mobile:</p>
+                  <ul className="space-y-1 text-xs">
+                    <li>• Kindle App</li>
+                    <li>• FBReader</li>
+                    <li>• Moon+ Reader</li>
+                  </ul>
+                </div>
+              </div>
+            </div>
+            
+            <p className="text-xs text-muted-foreground">
+              💡 Dica: Converta para EPUB usando o Calibre para ler no navegador
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+};
               </ul>
             </div>
           </div>

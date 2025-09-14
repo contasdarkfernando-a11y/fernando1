@@ -1,20 +1,47 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { Book as EpubBook } from 'epubjs';
+import ePub from 'epubjs';
 import { Button } from '@/components/ui/button';
 import { ChevronLeft, ChevronRight, ArrowLeft, Settings } from 'lucide-react';
+import { toast } from '@/hooks/use-toast';
 
 interface EpubReaderProps {
   file: File;
   onClose: () => void;
 }
 
+const READING_STATE_KEY = 'epub-reading-state';
+
 export const EpubReader = ({ file, onClose }: EpubReaderProps) => {
   const viewerRef = useRef<HTMLDivElement>(null);
-  const bookRef = useRef<EpubBook | null>(null);
+  const bookRef = useRef<any>(null);
   const renditionRef = useRef<any>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [currentLocation, setCurrentLocation] = useState('');
+  const [error, setError] = useState<string | null>(null);
 
+  // Salvar estado de leitura
+  const saveReadingState = (location: string) => {
+    const state = {
+      fileName: file.name,
+      location: location,
+      timestamp: Date.now()
+    };
+    localStorage.setItem(`${READING_STATE_KEY}-${file.name}`, JSON.stringify(state));
+  };
+
+  // Carregar estado de leitura
+  const loadReadingState = () => {
+    const stored = localStorage.getItem(`${READING_STATE_KEY}-${file.name}`);
+    if (stored) {
+      try {
+        const state = JSON.parse(stored);
+        return state.location;
+      } catch (error) {
+        console.error('Erro ao carregar estado de leitura:', error);
+      }
+    }
+    return null;
+  };
   useEffect(() => {
     let cleanup: (() => void) | null = null;
 
@@ -23,33 +50,53 @@ export const EpubReader = ({ file, onClose }: EpubReaderProps) => {
 
       try {
         setIsLoading(true);
+        setError(null);
         
-        // Criar URL do arquivo para o epubjs
-        const url = URL.createObjectURL(file);
-        const book = new EpubBook(url);
+        // Ler o arquivo como ArrayBuffer
+        const arrayBuffer = await file.arrayBuffer();
+        
+        // Criar o livro usando ePub
+        const book = ePub(arrayBuffer);
         bookRef.current = book;
 
-        // Aguardar o livro carregar completamente
+        // Aguardar o livro estar pronto
         await book.ready;
+
+        // Verificar se o elemento ainda existe
+        if (!viewerRef.current) return;
 
         const rendition = book.renderTo(viewerRef.current, {
           width: '100%',
           height: '100%',
-          spread: 'none',
-          flow: 'paginated'
+          flow: 'paginated',
+          manager: 'default'
         });
         
         renditionRef.current = rendition;
         
-        // Aguardar a renderização
-        await rendition.display();
+        // Carregar estado de leitura anterior
+        const savedLocation = loadReadingState();
+        
+        // Exibir o livro
+        if (savedLocation) {
+          await rendition.display(savedLocation);
+          toast({
+            title: "Posição restaurada",
+            description: "Continuando de onde você parou",
+          });
+        } else {
+          await rendition.display();
+        }
+        
         setIsLoading(false);
 
         // Configurar navegação por teclado
         const handleKeyPress = (event: KeyboardEvent) => {
           if (event.key === 'ArrowLeft') {
+            event.preventDefault();
             rendition.prev();
           } else if (event.key === 'ArrowRight') {
+            event.preventDefault();
             rendition.next();
           }
         };
@@ -58,17 +105,26 @@ export const EpubReader = ({ file, onClose }: EpubReaderProps) => {
 
         // Atualizar localização atual
         rendition.on('relocated', (location: any) => {
-          setCurrentLocation(location.start.cfi);
+          if (location && location.start && location.start.cfi) {
+            setCurrentLocation(location.start.cfi);
+            saveReadingState(location.start.cfi);
+          }
         });
 
         cleanup = () => {
           document.removeEventListener('keydown', handleKeyPress);
-          rendition.destroy();
-          URL.revokeObjectURL(url);
+          if (rendition) {
+            try {
+              rendition.destroy();
+            } catch (e) {
+              console.warn('Erro ao destruir rendition:', e);
+            }
+          }
         };
 
       } catch (error) {
         console.error('Erro ao carregar EPUB:', error);
+        setError('Erro ao carregar o arquivo EPUB. Verifique se o arquivo não está corrompido.');
         setIsLoading(false);
       }
     };
@@ -82,13 +138,21 @@ export const EpubReader = ({ file, onClose }: EpubReaderProps) => {
 
   const goToPrevPage = () => {
     if (renditionRef.current) {
-      renditionRef.current.prev();
+      try {
+        renditionRef.current.prev();
+      } catch (error) {
+        console.error('Erro ao navegar para página anterior:', error);
+      }
     }
   };
 
   const goToNextPage = () => {
     if (renditionRef.current) {
-      renditionRef.current.next();
+      try {
+        renditionRef.current.next();
+      } catch (error) {
+        console.error('Erro ao navegar para próxima página:', error);
+      }
     }
   };
 
@@ -122,14 +186,30 @@ export const EpubReader = ({ file, onClose }: EpubReaderProps) => {
             </div>
           </div>
         )}
+        
+        {error && (
+          <div className="absolute inset-0 flex items-center justify-center">
+            <div className="text-center max-w-md p-6">
+              <div className="text-red-500 mb-4">
+                <svg className="w-16 h-16 mx-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.732-.833-2.5 0L4.268 18.5c-.77.833.192 2.5 1.732 2.5z" />
+                </svg>
+              </div>
+              <h3 className="text-lg font-semibold mb-2">Erro ao carregar EPUB</h3>
+              <p className="text-muted-foreground mb-4">{error}</p>
+              <Button onClick={onClose}>Voltar</Button>
+            </div>
+          </div>
+        )}
+        
         <div 
           ref={viewerRef} 
-          className="w-full h-full"
+          className={`w-full h-full ${isLoading || error ? 'invisible' : 'visible'}`}
           style={{ minHeight: '100%' }}
         />
 
         {/* Controles de navegação */}
-        {!isLoading && (
+        {!isLoading && !error && (
           <>
             <Button
               variant="outline"
