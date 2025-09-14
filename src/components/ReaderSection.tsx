@@ -18,6 +18,16 @@ export const ReaderSection = () => {
   };
 
   const handleOpenBook = (book: UploadedBook) => {
+    // Verificar se o arquivo ainda existe
+    if (!book.file) {
+      toast({
+        title: "Arquivo não encontrado",
+        description: "O arquivo foi perdido. Tente fazer upload novamente.",
+        variant: "destructive"
+      });
+      return;
+    }
+    
     markAsRead(book.id);
     setCurrentBook(book);
   };

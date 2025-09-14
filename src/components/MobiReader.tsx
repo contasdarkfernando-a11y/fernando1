@@ -86,7 +86,7 @@ export const MobiReader: React.FC<MobiReaderProps> = ({ file, onClose }) => {
         fileName,
         pages: processedPages,
         timestamp: Date.now(),
-        fileSize: file.size
+        fileSize: file?.size || 0
       };
       localStorage.setItem(`${MOBI_CONTENT_KEY}-${fileName}`, JSON.stringify(cacheData));
     } catch (error) {
@@ -101,7 +101,7 @@ export const MobiReader: React.FC<MobiReaderProps> = ({ file, onClose }) => {
       if (cached) {
         const cacheData = JSON.parse(cached);
         // Verificar se é o mesmo arquivo (nome e tamanho)
-        if (cacheData.fileName === fileName && cacheData.fileSize === fileSize) {
+        if (cacheData.fileName === fileName && Math.abs(cacheData.fileSize - fileSize) < 100) {
           return cacheData.pages || null;
         }
       }
@@ -148,7 +148,7 @@ export const MobiReader: React.FC<MobiReaderProps> = ({ file, onClose }) => {
         setFontSize(savedState.fontSize);
 
         // Tentar carregar do cache primeiro
-        const cachedContent = loadMobiContent(file.name, file.size);
+        const cachedContent = loadMobiContent(file.name, file?.size || 0);
         if (cachedContent && cachedContent.length > 0) {
           setPages(cachedContent);
           setTotalPages(cachedContent.length);
@@ -166,6 +166,13 @@ export const MobiReader: React.FC<MobiReaderProps> = ({ file, onClose }) => {
               description: `Continuando da página ${savedState.page}`,
             });
           }
+          return;
+        }
+
+        // Verificar se o arquivo existe
+        if (!file) {
+          setError('file_missing');
+          setIsLoading(false);
           return;
         }
 
