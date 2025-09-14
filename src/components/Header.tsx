@@ -25,6 +25,7 @@ export const Header = ({ activeSection = 'home', onSectionChange, onBookClick }:
 
   const navigationItems = [
     { id: 'home', label: 'Início' },
+    { id: 'reader', label: 'Leitor' },
     { id: 'education', label: 'Educação' },
     { id: 'most-read', label: 'Mais Lidos' },
     { id: 'new', label: 'Novidades' },

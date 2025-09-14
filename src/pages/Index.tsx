@@ -6,6 +6,7 @@ import { Header } from '@/components/Header';
 import { HeroSection } from '@/components/HeroSection';
 import { BookCarousel } from '@/components/BookCarousel';
 import { BookModal } from '@/components/BookModal';
+import { ReaderSection } from '@/components/ReaderSection';
 import { Footer } from '@/components/Footer';
 
 const Index = () => {
@@ -26,6 +27,9 @@ const Index = () => {
 
   const renderSectionContent = () => {
     switch (activeSection) {
+      case 'reader':
+        return <ReaderSection />;
+      
       case 'library':
         return (
           <div className="py-8 md:py-12 space-y-12">
