@@ -16,23 +16,32 @@ export const EpubReader = ({ file, onClose }: EpubReaderProps) => {
   const [currentLocation, setCurrentLocation] = useState('');
 
   useEffect(() => {
+    let cleanup: (() => void) | null = null;
+
     const loadBook = async () => {
       if (!viewerRef.current) return;
 
       try {
-        const arrayBuffer = await file.arrayBuffer();
-        const book = new EpubBook();
-        await book.open(arrayBuffer);
+        setIsLoading(true);
+        
+        // Criar URL do arquivo para o epubjs
+        const url = URL.createObjectURL(file);
+        const book = new EpubBook(url);
         bookRef.current = book;
+
+        // Aguardar o livro carregar completamente
+        await book.ready;
 
         const rendition = book.renderTo(viewerRef.current, {
           width: '100%',
           height: '100%',
-          spread: 'none'
+          spread: 'none',
+          flow: 'paginated'
         });
         
         renditionRef.current = rendition;
         
+        // Aguardar a renderização
         await rendition.display();
         setIsLoading(false);
 
@@ -52,10 +61,12 @@ export const EpubReader = ({ file, onClose }: EpubReaderProps) => {
           setCurrentLocation(location.start.cfi);
         });
 
-        return () => {
+        cleanup = () => {
           document.removeEventListener('keydown', handleKeyPress);
           rendition.destroy();
+          URL.revokeObjectURL(url);
         };
+
       } catch (error) {
         console.error('Erro ao carregar EPUB:', error);
         setIsLoading(false);
@@ -63,6 +74,10 @@ export const EpubReader = ({ file, onClose }: EpubReaderProps) => {
     };
 
     loadBook();
+
+    return () => {
+      if (cleanup) cleanup();
+    };
   }, [file]);
 
   const goToPrevPage = () => {

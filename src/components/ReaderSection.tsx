@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { BookUploader } from './BookUploader';
 import { PdfReader } from './PdfReader';
 import { EpubReader } from './EpubReader';
+import { MobiReader } from './MobiReader';
 import { useUploadedBooks, UploadedBook } from '@/hooks/useUploadedBooks';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
@@ -49,10 +50,12 @@ export const ReaderSection = () => {
       return <PdfReader file={currentBook.file} onClose={handleCloseReader} />;
     } else if (fileExtension === 'epub') {
       return <EpubReader file={currentBook.file} onClose={handleCloseReader} />;
+    } else if (fileExtension === 'mobi') {
+      return <MobiReader file={currentBook.file} onClose={handleCloseReader} />;
     } else {
       toast({
-        title: "Formato não suportado ainda",
-        description: "MOBI será suportado em breve. Use PDF ou EPUB por enquanto.",
+        title: "Formato não suportado",
+        description: "Este formato de arquivo ainda não é suportado.",
         variant: "destructive"
       });
       setCurrentBook(null);
