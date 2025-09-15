@@ -297,6 +297,12 @@ export const library: Library = {
       books: classicBooks
     },
     {
+      id: 'audiobooks',
+      title: 'Audiobooks',
+      books: audiobooksSection,
+      isAudiobooks: true
+    },
+    {
       id: 'az',
       title: 'Explore de A a Z',
       books: [],
@@ -394,9 +400,3 @@ export const getAllBooks = (): Book[] => {
   
   return allBooks;
 };
-    {
-      id: 'audiobooks',
-      title: 'Audiobooks',
-      books: audiobooksSection,
-      isAudiobooks: true
-    },
