@@ -2,6 +2,8 @@ import { useState } from 'react';
 import { Book } from '@/types/book';
 import { library } from '@/data/books';
 import { useLibrary } from '@/hooks/useLibrary';
+import { useUploadedBooks } from '@/hooks/useUploadedBooks';
+import { toast } from '@/hooks/use-toast';
 import { Header } from '@/components/Header';
 import { HeroSection } from '@/components/HeroSection';
 import { BookCarousel } from '@/components/BookCarousel';
@@ -15,6 +17,7 @@ const Index = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [activeSection, setActiveSection] = useState('home');
   const { myLibrary } = useLibrary();
+  const { addBook } = useUploadedBooks();
 
   const handleBookClick = (book: Book) => {
     setSelectedBook(book);
@@ -24,6 +27,14 @@ const Index = () => {
   const handleCloseModal = () => {
     setIsModalOpen(false);
     setSelectedBook(null);
+  };
+
+  const handleAudioUpload = (file: File) => {
+    addBook(file);
+    toast({
+      title: "Audiobook adicionado!",
+      description: `${file.name} foi adicionado à sua biblioteca.`,
+    });
   };
 
   const renderSectionContent = () => {
