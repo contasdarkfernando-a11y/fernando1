@@ -1,8 +1,11 @@
 import { useState, useRef } from 'react';
-import { ChevronLeft, ChevronRight } from 'lucide-react';
+import { ChevronLeft, ChevronRight, Upload } from 'lucide-react';
 import { Book } from '@/types/book';
 import { BookCard } from './BookCard';
 import { azBooks } from '@/data/books';
+import { Button } from '@/components/ui/button';
+import { useDropzone } from 'react-dropzone';
+import { toast } from '@/hooks/use-toast';
 
 interface BookCarouselProps {
   title: string;
@@ -10,14 +13,51 @@ interface BookCarouselProps {
   onBookClick: (book: Book) => void;
   isAZ?: boolean;
   isAudiobooks?: boolean;
+  onAudioUpload?: (file: File) => void;
 }
 
-export const BookCarousel = ({ title, books, onBookClick, isAZ = false, isAudiobooks = false }: BookCarouselProps) => {
+export const BookCarousel = ({ title, books, onBookClick, isAZ = false, isAudiobooks = false, onAudioUpload }: BookCarouselProps) => {
   const [selectedLetter, setSelectedLetter] = useState('A');
   const carouselRef = useRef<HTMLDivElement>(null);
   
   const alphabet = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'.split('');
   const displayBooks = isAZ ? azBooks[selectedLetter] || [] : books;
+
+  // Upload de audiobooks
+  const onDrop = (acceptedFiles: File[]) => {
+    const file = acceptedFiles[0];
+    if (file && onAudioUpload) {
+      const supportedTypes = ['.mp3', '.m4a', '.wav', '.ogg', '.aac'];
+      const fileExtension = '.' + file.name.split('.').pop()?.toLowerCase();
+      
+      if (supportedTypes.includes(fileExtension)) {
+        onAudioUpload(file);
+        toast({
+          title: "Audiobook carregado!",
+          description: `"${file.name}" foi adicionado aos seus audiobooks.`,
+        });
+      } else {
+        toast({
+          title: "Formato não suportado",
+          description: "Use MP3, M4A, WAV, OGG ou AAC.",
+          variant: "destructive"
+        });
+      }
+    }
+  };
+
+  const { getRootProps, getInputProps } = useDropzone({
+    onDrop,
+    accept: {
+      'audio/mpeg': ['.mp3'],
+      'audio/mp4': ['.m4a'],
+      'audio/wav': ['.wav'],
+      'audio/ogg': ['.ogg'],
+      'audio/aac': ['.aac']
+    },
+    multiple: false,
+    noClick: true
+  });
 
   const scrollCarousel = (direction: 'left' | 'right') => {
     if (carouselRef.current) {
@@ -33,9 +73,24 @@ export const BookCarousel = ({ title, books, onBookClick, isAZ = false, isAudiob
 
   return (
     <section className="carousel-section space-y-4 animate-fade-in-up">
-      <h2 className="text-2xl md:text-3xl font-bold px-4 md:px-8">
-        {title}
-      </h2>
+      <div className="flex items-center justify-between px-4 md:px-8">
+        <h2 className="text-2xl md:text-3xl font-bold">
+          {title}
+        </h2>
+        {isAudiobooks && onAudioUpload && (
+          <div {...getRootProps()}>
+            <input {...getInputProps()} />
+            <Button 
+              size="sm" 
+              variant="outline"
+              className="flex items-center gap-2 hover:bg-primary/10"
+            >
+              <Upload className="w-4 h-4" />
+              Upload Audiobook
+            </Button>
+          </div>
+        )}
+      </div>
 
       {isAZ && (
         <div className="flex items-center space-x-2 md:space-x-4 px-4 md:px-8 overflow-x-auto pb-2">

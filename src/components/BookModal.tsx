@@ -2,6 +2,7 @@ import { X, ExternalLink, Plus, Minus } from 'lucide-react';
 import { Book } from '@/types/book';
 import { Button } from '@/components/ui/button';
 import { useLibrary } from '@/hooks/useLibrary';
+import { AudioPlayer } from '@/components/AudioPlayer';
 
 interface BookModalProps {
   book: Book | null;
@@ -14,6 +15,10 @@ export const BookModal = ({ book, isOpen, onClose }: BookModalProps) => {
 
   if (!book || !isOpen) return null;
 
+  // Se for audiobook, mostrar o player em vez do modal
+  if (book.isAudiobook && book.audioUrl) {
+    return <AudioPlayer book={book} onClose={onClose} />;
+  }
   const inLibrary = isInLibrary(book.id);
 
   const handleLibraryAction = () => {

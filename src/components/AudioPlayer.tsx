@@ -148,7 +148,7 @@ export const AudioPlayer = ({ book, onClose }: AudioPlayerProps) => {
             <img 
               src={book.cover} 
               alt={book.title}
-              className="w-64 h-64 mx-auto rounded-2xl shadow-2xl object-cover"
+              className="w-80 h-80 mx-auto rounded-2xl shadow-2xl object-cover"
             />
             {isLoading && (
               <div className="absolute inset-0 flex items-center justify-center bg-black/50 rounded-2xl">

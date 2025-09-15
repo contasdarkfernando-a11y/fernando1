@@ -121,6 +121,8 @@ const Index = () => {
                   title={section.title}
                   books={section.books}
                   onBookClick={handleBookClick}
+                  isAudiobooks={section.isAudiobooks}
+                  onAudioUpload={section.isAudiobooks ? handleAudioUpload : undefined}
                 />
               ))}
               
