@@ -220,6 +220,76 @@ const classicBooks: Book[] = [
   }
 ];
 
+// Audiobooks famosos
+const audiobooksSection: Book[] = [
+  {
+    id: 'pai-rico-pai-pobre-audio',
+    title: 'Pai Rico, Pai Pobre',
+    author: 'Robert Kiyosaki',
+    summary: 'O livro que mudou a forma como milhões de pessoas pensam sobre dinheiro e investimentos. Uma lição valiosa sobre educação financeira.',
+    cover: 'https://images.unsplash.com/photo-1554224155-6726b3ff858f?w=400&h=600&fit=crop&crop=center',
+    driveLink: '#',
+    isAudiobook: true,
+    audioUrl: 'https://www.soundjay.com/misc/sounds/bell-ringing-05.wav', // Placeholder
+    duration: '6h 9m'
+  },
+  {
+    id: 'mil-ao-milhao-audio',
+    title: 'Do Mil ao Milhão',
+    author: 'Thiago Nigro',
+    summary: 'O guia definitivo para sair da situação de dívidas, conseguir juntar dinheiro e multiplicar o patrimônio.',
+    cover: 'https://images.unsplash.com/photo-1579621970563-ebec7560ff3e?w=400&h=600&fit=crop&crop=center',
+    driveLink: '#',
+    isAudiobook: true,
+    audioUrl: 'https://www.soundjay.com/misc/sounds/bell-ringing-05.wav', // Placeholder
+    duration: '8h 15m'
+  },
+  {
+    id: '7-habitos-audio',
+    title: 'Os 7 Hábitos das Pessoas Altamente Eficazes',
+    author: 'Stephen R. Covey',
+    summary: 'Lições poderosas de mudança pessoal que transformaram a vida de milhões de pessoas ao redor do mundo.',
+    cover: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=400&h=600&fit=crop&crop=center',
+    driveLink: '#',
+    isAudiobook: true,
+    audioUrl: 'https://www.soundjay.com/misc/sounds/bell-ringing-05.wav', // Placeholder
+    duration: '13h 4m'
+  },
+  {
+    id: 'quem-pensa-enriquece-audio',
+    title: 'Quem Pensa Enriquece',
+    author: 'Napoleon Hill',
+    summary: 'O clássico atemporal sobre como desenvolver a mentalidade de riqueza e alcançar o sucesso financeiro.',
+    cover: 'https://images.unsplash.com/photo-1434030216411-0b793f4b4173?w=400&h=600&fit=crop&crop=center',
+    driveLink: '#',
+    isAudiobook: true,
+    audioUrl: 'https://www.soundjay.com/misc/sounds/bell-ringing-05.wav', // Placeholder
+    duration: '10h 17m'
+  },
+  {
+    id: 'mindset-audio',
+    title: 'Mindset: A Nova Psicologia do Sucesso',
+    author: 'Carol S. Dweck',
+    summary: 'Como podemos aprender a realizar nosso potencial através da mudança de mentalidade.',
+    cover: 'https://images.unsplash.com/photo-1481627834876-b7833e8f5570?w=400&h=600&fit=crop&crop=center',
+    driveLink: '#',
+    isAudiobook: true,
+    audioUrl: 'https://www.soundjay.com/misc/sounds/bell-ringing-05.wav', // Placeholder
+    duration: '7h 32m'
+  },
+  {
+    id: 'poder-do-agora-audio',
+    title: 'O Poder do Agora',
+    author: 'Eckhart Tolle',
+    summary: 'Um guia para a iluminação espiritual que ensina como viver plenamente no momento presente.',
+    cover: 'https://images.unsplash.com/photo-1544716278-ca5e3f4abd8c?w=400&h=600&fit=crop&crop=center',
+    driveLink: '#',
+    isAudiobook: true,
+    audioUrl: 'https://www.soundjay.com/misc/sounds/bell-ringing-05.wav', // Placeholder
+    duration: '7h 37m'
+  }
+];
+
 // Gerar livros A-Z
 const generateAZBooks = (): Record<string, Book[]> => {
   const alphabet = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
@@ -312,76 +382,6 @@ export const library: Library = {
 };
 
 export const azBooks = generateAZBooks();
-
-// Audiobooks famosos
-const audiobooksSection: Book[] = [
-  {
-    id: 'pai-rico-pai-pobre-audio',
-    title: 'Pai Rico, Pai Pobre',
-    author: 'Robert Kiyosaki',
-    summary: 'O livro que mudou a forma como milhões de pessoas pensam sobre dinheiro e investimentos. Uma lição valiosa sobre educação financeira.',
-    cover: 'https://images.unsplash.com/photo-1554224155-6726b3ff858f?w=400&h=600&fit=crop&crop=center',
-    driveLink: '#',
-    isAudiobook: true,
-    audioUrl: 'https://www.soundjay.com/misc/sounds/bell-ringing-05.wav', // Placeholder
-    duration: '6h 9m'
-  },
-  {
-    id: 'mil-ao-milhao-audio',
-    title: 'Do Mil ao Milhão',
-    author: 'Thiago Nigro',
-    summary: 'O guia definitivo para sair da situação de dívidas, conseguir juntar dinheiro e multiplicar o patrimônio.',
-    cover: 'https://images.unsplash.com/photo-1579621970563-ebec7560ff3e?w=400&h=600&fit=crop&crop=center',
-    driveLink: '#',
-    isAudiobook: true,
-    audioUrl: 'https://www.soundjay.com/misc/sounds/bell-ringing-05.wav', // Placeholder
-    duration: '8h 15m'
-  },
-  {
-    id: '7-habitos-audio',
-    title: 'Os 7 Hábitos das Pessoas Altamente Eficazes',
-    author: 'Stephen R. Covey',
-    summary: 'Lições poderosas de mudança pessoal que transformaram a vida de milhões de pessoas ao redor do mundo.',
-    cover: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=400&h=600&fit=crop&crop=center',
-    driveLink: '#',
-    isAudiobook: true,
-    audioUrl: 'https://www.soundjay.com/misc/sounds/bell-ringing-05.wav', // Placeholder
-    duration: '13h 4m'
-  },
-  {
-    id: 'quem-pensa-enriquece-audio',
-    title: 'Quem Pensa Enriquece',
-    author: 'Napoleon Hill',
-    summary: 'O clássico atemporal sobre como desenvolver a mentalidade de riqueza e alcançar o sucesso financeiro.',
-    cover: 'https://images.unsplash.com/photo-1434030216411-0b793f4b4173?w=400&h=600&fit=crop&crop=center',
-    driveLink: '#',
-    isAudiobook: true,
-    audioUrl: 'https://www.soundjay.com/misc/sounds/bell-ringing-05.wav', // Placeholder
-    duration: '10h 17m'
-  },
-  {
-    id: 'mindset-audio',
-    title: 'Mindset: A Nova Psicologia do Sucesso',
-    author: 'Carol S. Dweck',
-    summary: 'Como podemos aprender a realizar nosso potencial através da mudança de mentalidade.',
-    cover: 'https://images.unsplash.com/photo-1481627834876-b7833e8f5570?w=400&h=600&fit=crop&crop=center',
-    driveLink: '#',
-    isAudiobook: true,
-    audioUrl: 'https://www.soundjay.com/misc/sounds/bell-ringing-05.wav', // Placeholder
-    duration: '7h 32m'
-  },
-  {
-    id: 'poder-do-agora-audio',
-    title: 'O Poder do Agora',
-    author: 'Eckhart Tolle',
-    summary: 'Um guia para a iluminação espiritual que ensina como viver plenamente no momento presente.',
-    cover: 'https://images.unsplash.com/photo-1544716278-ca5e3f4abd8c?w=400&h=600&fit=crop&crop=center',
-    driveLink: '#',
-    isAudiobook: true,
-    audioUrl: 'https://www.soundjay.com/misc/sounds/bell-ringing-05.wav', // Placeholder
-    duration: '7h 37m'
-  }
-];
 
 // Função para buscar todos os livros
 export const getAllBooks = (): Book[] => {
