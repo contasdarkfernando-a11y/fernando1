@@ -27,6 +27,7 @@ export const Header = ({ activeSection = 'home', onSectionChange, onBookClick }:
     { id: 'home', label: 'Início' },
     { id: 'reader', label: 'Leitor' },
     { id: 'education', label: 'Educação' },
+    { id: 'audiobooks', label: 'Audiobooks' },
     { id: 'most-read', label: 'Mais Lidos' },
     { id: 'new', label: 'Novidades' },
     { id: 'az', label: 'A-Z' },

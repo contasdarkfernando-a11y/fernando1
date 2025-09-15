@@ -9,9 +9,10 @@ interface BookCarouselProps {
   books: Book[];
   onBookClick: (book: Book) => void;
   isAZ?: boolean;
+  isAudiobooks?: boolean;
 }
 
-export const BookCarousel = ({ title, books, onBookClick, isAZ = false }: BookCarouselProps) => {
+export const BookCarousel = ({ title, books, onBookClick, isAZ = false, isAudiobooks = false }: BookCarouselProps) => {
   const [selectedLetter, setSelectedLetter] = useState('A');
   const carouselRef = useRef<HTMLDivElement>(null);
   

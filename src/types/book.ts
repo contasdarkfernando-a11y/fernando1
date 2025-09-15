@@ -6,6 +6,9 @@ export interface Book {
   cover: string;
   driveLink: string;
   category?: string;
+  isAudiobook?: boolean;
+  audioUrl?: string;
+  duration?: string;
 }
 
 export interface BookSection {
@@ -13,6 +16,7 @@ export interface BookSection {
   title: string;
   books: Book[];
   isAZ?: boolean;
+  isAudiobooks?: boolean;
 }
 
 export interface Library {

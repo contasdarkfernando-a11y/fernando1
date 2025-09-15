@@ -10,14 +10,18 @@ export interface UploadedBook {
   file: File;
   lastRead?: Date;
   fileContent?: string; // Base64 content for persistence
+  isAudiobook?: boolean;
+  duration?: string;
 }
 
 const UPLOADED_BOOKS_KEY = 'uploaded-books-storage';
+const UPLOADED_AUDIOBOOKS_KEY = 'uploaded-audiobooks-storage';
 const LAST_READ_BOOK_KEY = 'last-read-book';
 const MAX_FILE_SIZE = 4 * 1024 * 1024; // 4MB limit for localStorage
 
 export const useUploadedBooks = () => {
   const [uploadedBooks, setUploadedBooks] = useState<UploadedBook[]>([]);
+  const [uploadedAudiobooks, setUploadedAudiobooks] = useState<UploadedBook[]>([]);
   const [lastReadBook, setLastReadBook] = useState<string | null>(null);
 
   // Converter File para Base64
@@ -50,6 +54,7 @@ export const useUploadedBooks = () => {
   useEffect(() => {
     const loadStoredBooks = async () => {
       const stored = localStorage.getItem(UPLOADED_BOOKS_KEY);
+      const storedAudiobooks = localStorage.getItem(UPLOADED_AUDIOBOOKS_KEY);
       const lastRead = localStorage.getItem(LAST_READ_BOOK_KEY);
       
       if (stored) {
@@ -87,6 +92,43 @@ export const useUploadedBooks = () => {
           console.error('Erro ao carregar livros do cache:', error);
           // Limpar cache corrompido
           localStorage.removeItem(UPLOADED_BOOKS_KEY);
+        }
+      }
+      
+      // Carregar audiobooks
+      if (storedAudiobooks) {
+        try {
+          const parsedAudiobooks = JSON.parse(storedAudiobooks);
+          const reconstructedAudiobooks: UploadedBook[] = [];
+          
+          for (const audiobookData of parsedAudiobooks) {
+            try {
+              if (audiobookData.fileContent) {
+                const file = base64ToFile(audiobookData.fileContent, audiobookData.name, audiobookData.type);
+                reconstructedAudiobooks.push({
+                  ...audiobookData,
+                  uploadDate: new Date(audiobookData.uploadDate),
+                  lastRead: audiobookData.lastRead ? new Date(audiobookData.lastRead) : undefined,
+                  file: file,
+                  isAudiobook: true
+                });
+              }
+            } catch (error) {
+              console.warn(`Erro ao reconstruir audiobook ${audiobookData.name}:`, error);
+            }
+          }
+          
+          setUploadedAudiobooks(reconstructedAudiobooks);
+          
+          if (reconstructedAudiobooks.length > 0) {
+            toast({
+              title: "Audiobooks restaurados",
+              description: `${reconstructedAudiobooks.length} audiobook(s) carregado(s) do cache local.`,
+            });
+          }
+        } catch (error) {
+          console.error('Erro ao carregar audiobooks do cache:', error);
+          localStorage.removeItem(UPLOADED_AUDIOBOOKS_KEY);
         }
       }
       
@@ -151,22 +193,71 @@ export const useUploadedBooks = () => {
     }
   };
 
+  // Salvar audiobooks separadamente
+  const saveAudiobooks = async (audiobooks: UploadedBook[]) => {
+    try {
+      const audiobooksToSave = await Promise.all(
+        audiobooks.map(async (audiobook) => {
+          let fileContent = audiobook.fileContent;
+          
+          if (!fileContent && audiobook.file) {
+            try {
+              fileContent = await fileToBase64(audiobook.file);
+            } catch (error) {
+              console.warn(`Erro ao converter audiobook ${audiobook.name} para Base64:`, error);
+              fileContent = undefined;
+            }
+          }
+          
+          return {
+            id: audiobook.id,
+            name: audiobook.name,
+            type: audiobook.type,
+            size: audiobook.size,
+            uploadDate: audiobook.uploadDate,
+            lastRead: audiobook.lastRead,
+            fileContent: fileContent,
+            isAudiobook: true,
+            duration: audiobook.duration
+          };
+        })
+      );
+      
+      localStorage.setItem(UPLOADED_AUDIOBOOKS_KEY, JSON.stringify(audiobooksToSave));
+    } catch (error) {
+      console.error('Erro ao salvar audiobooks:', error);
+    }
+  };
+
   // Marcar livro como lido
   const markAsRead = (bookId: string) => {
     setLastReadBook(bookId);
     localStorage.setItem(LAST_READ_BOOK_KEY, bookId);
     
-    setUploadedBooks(prev => {
-      const updated = prev.map(book => 
-        book.id === bookId 
-          ? { ...book, lastRead: new Date() }
-          : book
-      );
-      
-      // Salvar no localStorage
-      saveBooks(updated);
-      return updated;
-    });
+    // Verificar se é um livro ou audiobook
+    const isAudiobook = uploadedAudiobooks.some(book => book.id === bookId);
+    
+    if (isAudiobook) {
+      setUploadedAudiobooks(prev => {
+        const updated = prev.map(book => 
+          book.id === bookId 
+            ? { ...book, lastRead: new Date() }
+            : book
+        );
+        saveAudiobooks(updated);
+        return updated;
+      });
+    } else {
+      setUploadedBooks(prev => {
+        const updated = prev.map(book => 
+          book.id === bookId 
+            ? { ...book, lastRead: new Date() }
+            : book
+        );
+        saveBooks(updated);
+        return updated;
+      });
+    }
   };
 
   const addBook = async (file: File) => {
@@ -178,24 +269,34 @@ export const useUploadedBooks = () => {
       });
     }
 
+    const isAudioFile = file.type.startsWith('audio/');
+    
     const newBook: UploadedBook = {
       id: `${file.name}-${Date.now()}`,
       name: file.name,
       type: file.type,
       size: file.size,
       uploadDate: new Date(),
-      file: file
+      file: file,
+      isAudiobook: isAudioFile
     };
 
-    setUploadedBooks(prev => {
-      const updated = [...prev, newBook];
-      // Salvar no localStorage (async)
-      saveBooks(updated);
-      return updated;
-    });
+    if (isAudioFile) {
+      setUploadedAudiobooks(prev => {
+        const updated = [...prev, newBook];
+        saveAudiobooks(updated);
+        return updated;
+      });
+    } else {
+      setUploadedBooks(prev => {
+        const updated = [...prev, newBook];
+        saveBooks(updated);
+        return updated;
+      });
+    }
 
     toast({
-      title: "Livro adicionado!",
+      title: isAudioFile ? "Audiobook adicionado!" : "Livro adicionado!",
       description: `"${file.name}" foi adicionado à sua biblioteca pessoal.`,
     });
   };
@@ -207,31 +308,45 @@ export const useUploadedBooks = () => {
       localStorage.removeItem(LAST_READ_BOOK_KEY);
     }
     
-    setUploadedBooks(prev => {
-      const updated = prev.filter(book => book.id !== bookId);
-      saveBooks(updated);
-      return updated;
-    });
+    // Verificar se é um livro ou audiobook
+    const isAudiobook = uploadedAudiobooks.some(book => book.id === bookId);
+    
+    if (isAudiobook) {
+      setUploadedAudiobooks(prev => {
+        const updated = prev.filter(book => book.id !== bookId);
+        saveAudiobooks(updated);
+        return updated;
+      });
+    } else {
+      setUploadedBooks(prev => {
+        const updated = prev.filter(book => book.id !== bookId);
+        saveBooks(updated);
+        return updated;
+      });
+    }
 
     toast({
-      title: "Livro removido",
-      description: "O livro foi removido da sua biblioteca pessoal.",
+      title: isAudiobook ? "Audiobook removido" : "Livro removido",
+      description: `O ${isAudiobook ? 'audiobook' : 'livro'} foi removido da sua biblioteca pessoal.`,
     });
   };
 
   const clearAllBooks = () => {
     setUploadedBooks([]);
+    setUploadedAudiobooks([]);
     setLastReadBook(null);
     localStorage.removeItem(UPLOADED_BOOKS_KEY);
+    localStorage.removeItem(UPLOADED_AUDIOBOOKS_KEY);
     localStorage.removeItem(LAST_READ_BOOK_KEY);
     toast({
       title: "Biblioteca limpa",
-      description: "Todos os livros foram removidos da sua biblioteca pessoal.",
+      description: "Todos os livros e audiobooks foram removidos da sua biblioteca pessoal.",
     });
   };
 
   return {
     uploadedBooks,
+    uploadedAudiobooks,
     lastReadBook,
     addBook,
     removeBook,
