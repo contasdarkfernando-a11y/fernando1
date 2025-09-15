@@ -227,7 +227,7 @@ const audiobooksSection: Book[] = [
     title: 'Pai Rico, Pai Pobre',
     author: 'Robert Kiyosaki',
     summary: 'O livro que mudou a forma como milhões de pessoas pensam sobre dinheiro e investimentos. Uma lição valiosa sobre educação financeira.',
-    cover: 'https://images.unsplash.com/photo-1554224155-6726b3ff858f?w=400&h=600&fit=crop&crop=center',
+    cover: 'https://m.media-amazon.com/images/I/51OYJ9PbxpL._SL240_CATL,225,225_RO112,1,0,0,0,0,0,0,8_.jpg',
     driveLink: '#',
     isAudiobook: true,
     audioUrl: 'https://www.soundjay.com/misc/sounds/bell-ringing-05.wav', // Placeholder
